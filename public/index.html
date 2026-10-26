@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlashDelivery - Panel de Gestion</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f4f6f9; }
+    .sidebar {
+      min-height: 100vh;
+      background: #1e293b;
+      color: white;
+    }
+    .sidebar .nav-link {
+      color: #cbd5e1;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      cursor: pointer;
+    }
+    .sidebar .nav-link:hover,
+    .sidebar .nav-link.active {
+      background: #334155;
+      color: white;
+    }
+    .card {
+      border: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .table th {
+      background: #f1f5f9;
+    }
+    .alert-fixed {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      min-width: 280px;
+    }
+  </style>
+</head>
+<body>
+  <div id="alerta" class="alert alert-fixed" style="display:none;"></div>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-2 sidebar p-3">
+        <h4 class="mb-4">FlashDelivery</h4>
+        <nav class="nav flex-column">
+          <a class="nav-link active" id="nav-dashboard" onclick="mostrarSeccion('dashboard')">Dashboard</a>
+          <a class="nav-link" id="nav-restaurantes" onclick="mostrarSeccion('restaurantes')">Restaurantes</a>
+          <a class="nav-link" id="nav-repartidores" onclick="mostrarSeccion('repartidores')">Repartidores</a>
+          <a class="nav-link" id="nav-clientes" onclick="mostrarSeccion('clientes')">Clientes</a>
+          <a class="nav-link" id="nav-pedidos" onclick="mostrarSeccion('pedidos')">Pedidos</a>
+        </nav>
+      </div>
+
+      <div class="col-md-10 p-4">
+
+        <div id="seccion-dashboard">
+          <h2 class="mb-4">Dashboard</h2>
+          <div class="row g-3">
+            <div class="col-md-3">
+              <div class="card p-3">
+                <h6 class="text-muted">Restaurantes</h6>
+                <h2 id="count-restaurantes">0</h2>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card p-3">
+                <h6 class="text-muted">Repartidores</h6>
+                <h2 id="count-repartidores">0</h2>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card p-3">
+                <h6 class="text-muted">Clientes</h6>
+                <h2 id="count-clientes">0</h2>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card p-3">
+                <h6 class="text-muted">Pedidos</h6>
+                <h2 id="count-pedidos">0</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="seccion-restaurantes" style="display:none;">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Restaurantes</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalRestaurante">Nuevo Restaurante</button>
+          </div>
+          <div class="card">
+            <div class="card-body table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Codigo</th>
+                    <th>Nombre</th>
+                    <th>Especialidades</th>
+                    <th>Productos</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tabla-restaurantes"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="seccion-repartidores" style="display:none;">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Repartidores</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalRepartidor">Nuevo Repartidor</button>
+          </div>
+          <div class="card">
+            <div class="card-body table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Placa</th>
+                    <th>Nombre</th>
+                    <th>Telefonos</th>
+                    <th>Licencia</th>
+                    <th>Supervisor</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tabla-repartidores"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="seccion-clientes" style="display:none;">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Clientes</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCliente">Nuevo Cliente</button>
+          </div>
+          <div class="card">
+            <div class="card-body table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>DNI</th>
+                    <th>Calle</th>
+                    <th>Numero</th>
+                    <th>Zona</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tabla-clientes"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="seccion-pedidos" style="display:none;">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Pedidos</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPedido" onclick="cargarSelectsPedido()">Nuevo Pedido</button>
+          </div>
+          <div class="card">
+            <div class="card-body table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Numero</th>
+                    <th>Fecha</th>
+                    <th>Monto</th>
+                    <th>Restaurante</th>
+                    <th>Cliente</th>
+                    <th>Repartidor</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tabla-pedidos"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL RESTAURANTE -->
+  <div class="modal fade" id="modalRestaurante" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nuevo Restaurante</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Codigo</label>
+            <input type="text" class="form-control" id="rest-codigo" placeholder="REST003">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="rest-nombre">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Especialidades (separadas por coma)</label>
+            <input type="text" class="form-control" id="rest-especialidades" placeholder="pizza, italiana">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Producto - Codigo</label>
+            <input type="text" class="form-control" id="rest-prod-codigo" placeholder="P010">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Producto - Nombre</label>
+            <input type="text" class="form-control" id="rest-prod-nombre">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Producto - Precio</label>
+            <input type="number" class="form-control" id="rest-prod-precio">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="crearRestaurante()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL REPARTIDOR -->
+  <div class="modal fade" id="modalRepartidor" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nuevo Repartidor</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Placa</label>
+            <input type="text" class="form-control" id="rep-placa">
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Nombre</label>
+              <input type="text" class="form-control" id="rep-nombre">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Apellidos</label>
+              <input type="text" class="form-control" id="rep-apellidos">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Telefonos (separados por coma)</label>
+            <input type="text" class="form-control" id="rep-telefonos">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Numero de Licencia</label>
+            <input type="text" class="form-control" id="rep-lic-numero">
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Tipo de Licencia</label>
+              <input type="text" class="form-control" id="rep-lic-tipo">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Fecha de Vencimiento</label>
+              <input type="date" class="form-control" id="rep-lic-fecha">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="crearRepartidor()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CLIENTE -->
+  <div class="modal fade" id="modalCliente" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nuevo Cliente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">DNI</label>
+            <input type="text" class="form-control" id="cli-dni">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Calle</label>
+            <input type="text" class="form-control" id="cli-calle">
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Numero</label>
+              <input type="text" class="form-control" id="cli-numero">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Zona</label>
+              <input type="text" class="form-control" id="cli-zona">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="crearCliente()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PEDIDO -->
+  <div class="modal fade" id="modalPedido" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nuevo Pedido</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Numero de Pedido</label>
+              <input type="text" class="form-control" id="ped-numero">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Monto Total</label>
+              <input type="number" class="form-control" id="ped-monto">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Restaurante</label>
+              <select class="form-select" id="ped-restaurante"></select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Cliente</label>
+              <select class="form-select" id="ped-cliente"></select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Repartidor</label>
+              <select class="form-select" id="ped-repartidor">
+                <option value="">Sin asignar</option>
+              </select>
+            </div>
+          </div>
+          <hr>
+          <h6>Detalle del producto</h6>
+          <div class="row">
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Codigo</label>
+              <input type="text" class="form-control" id="ped-prod-codigo">
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Nombre</label>
+              <input type="text" class="form-control" id="ped-prod-nombre">
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Precio</label>
+              <input type="number" class="form-control" id="ped-prod-precio">
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Cantidad</label>
+              <input type="number" class="form-control" id="ped-prod-cantidad" value="1" min="1">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="crearPedido()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
